@@ -2,7 +2,7 @@
 serverColour = Color(255, 200, 200, 200)	--ABGR
 joinColour = Color(255, 10, 255, 10)
 deathColour = Color(255, 10, 10, 255)
-announceColour = Color(255, 0, 255, 255)
+announceColour = Color(255, 255, 255, 0)
 
 -- Globals
 homes = {} -- A Table to store home location
@@ -10,8 +10,6 @@ kills = {}
 
 onModuleLoad = function(args)
 	print("Module loaded")
-
-	local players = DefaultWorld:GetPlayers()
 
 	for p in Server:GetPlayers() do
 		kills[p:GetName()] = 0
@@ -104,40 +102,37 @@ onPlayerChat = function(args)
 	end
 	
 	if string.find(message, "/getweapon") then
-			giveWeapon = function(id)
-				player:GiveWeapon(1,Weapon(id))
-			end
-			-- Get type
-			local type = string.sub(message, 12)
+		giveWeapon = function(id)
+			player:GiveWeapon(1,Weapon(id))
+		end
 
-			-- Shortcut types
-			if type == "random" then
-				local id = math.random(0, 91)
-				if pcall(giveWeapon,id) then
-					Chat:Send(player, "Rolled weaponId " .. id, serverColour)
-				else
-					Chat:Send("Invalid Weapon ID", serverColour)
-				end
-			
+		-- Get type
+		local type = string.sub(message, 12)
+
+		-- Shortcut types
+		if type == "random" then
+			local id = math.random(1, 105)
+			if pcall(giveWeapon, id) then
+				Chat:Send(player, "Rolled weaponId " .. id, serverColour)
 			else
-				local id = tonumber(type)
-				
-				-- If it's a valid number
-				if id != nil then
-					-- It's a valid vehicleId
-					if id >= 0 and id <= 91 then
-						if pcall(giveWeapon,id) then
-							Chat:Send(player, "Giving weapon " .. id, serverColour)
-						else
-							Chat:Send(player, "Invalid Weapon ID", serverColour)
-						end
-					else
-						Chat:Send(player, "Valid range is 0 - 91", serverColour)
-					end
-				end
-			
-			return false
+				Chat:Send("Invalid weaponId. Try again!", serverColour)
 			end
+		
+		else
+			local id = tonumber(type)
+			
+			-- If it's a valid number
+			if id != nil then
+				if pcall(giveWeapon, id) then
+					-- Success! No notification for now
+				else
+					Chat:Send(player, "Invalid weaponId", serverColour)
+				end
+			end
+		end
+		
+		return false
+	end
 
 	-- Teleport to a player
 	if string.find(message, "/gotoplayer") then
@@ -265,3 +260,4 @@ Events:Subscribe("ModuleLoad", onModuleLoad)
 -- '..' is the string concatenation operator
 -- ':' is the call operator for objects
 -- '.' is the call operator for static methods
+-- World instance is DefaultWorld
