@@ -13,7 +13,7 @@ onModuleLoad = function(args)
 
 	local players = DefaultWorld:GetPlayers()
 
-	for p in players do
+	for p in Server:GetPlayers() do
 		kills[p:GetName()] = 0
 	end
 
