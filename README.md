@@ -4,6 +4,7 @@ jc2-mp-cl
 A base script for Just Cause 2 Multiplayer Mod.
 
 Available commands:
+
 /help - Issue this list of commands
 
 /about - Show about info
