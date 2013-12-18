@@ -2,7 +2,7 @@
 serverColour = Color(255, 200, 200, 200)	--ABGR
 joinColour = Color(255, 10, 255, 10)
 deathColour = Color(255, 10, 10, 255)
-announceColour = Color(255, 255, 255, 0)
+announceColour = Color(255, 0, 255, 255)
 
 -- Globals
 homes = {} -- A Table to store home location
@@ -42,6 +42,7 @@ onPlayerChat = function(args)
 		Chat:Send(player, "Available commands:", serverColour) 
 		Chat:Send(player, "/help /about /kill /locate", serverColour)
 		Chat:Send(player, "/getvehicle [car, plane, random] or <wikivalue 0 - 91>", serverColour)
+		Chat:Send(player, "/getweapon [handgun, revolver, sawnoff]", serverColour)
 		Chat:Send(player, "/sethome /gohome ", serverColour)
 		Chat:Send(player, "/gotoplayer <name>", serverColour)
 		Chat:Send(player, "/scores", serverColour)
@@ -66,6 +67,10 @@ onPlayerChat = function(args)
 
 	-- Spawn vehicles
 	if string.find(message, "/getvehicle") then
+		createVehicle = function(id, position)
+			Vehicle.Create(id, position, player:GetAngle())
+		end
+
 		-- Get type
 		local type = string.sub(message, 13)
 
@@ -81,7 +86,11 @@ onPlayerChat = function(args)
 		elseif type == "random" then
 			local id = math.random(0, 91)
 			Chat:Send(player, "Rolled vehicleId " .. id, serverColour)
-			Vehicle.Create(id, position, player:GetAngle())
+			if pcall(createVehicle, id, position) then
+				-- Success!
+			else	
+				Chat:Send(player, "Invalid vehicleId! Try again.", serverColour)
+			end
 		
 		-- Numerical value
 		else
@@ -103,32 +112,27 @@ onPlayerChat = function(args)
 	
 	if string.find(message, "/getweapon") then
 		giveWeapon = function(id)
-			player:GiveWeapon(1,Weapon(id))
+			player:GiveWeapon(0, Weapon(id))
 		end
 
-		-- Get type
+		-- Get type, then id
 		local type = string.sub(message, 12)
+		local id = 2
 
-		-- Shortcut types
-		if type == "random" then
-			local id = math.random(1, 105)
-			if pcall(giveWeapon, id) then
-				Chat:Send(player, "Rolled weaponId " .. id, serverColour)
-			else
-				Chat:Send("Invalid weaponId. Try again!", serverColour)
-			end
-		
+		-- Turn name into id
+		if type == "handgun" then
+			id = 2
+		elseif type == "revolver" then
+			id = 4
+		elseif type == "sawnoff" then
+			id = 6
+		end
+
+		-- Give the weapon
+		if pcall(giveWeapon, id) then
+			-- Success! No notification for now
 		else
-			local id = tonumber(type)
-			
-			-- If it's a valid number
-			if id != nil then
-				if pcall(giveWeapon, id) then
-					-- Success! No notification for now
-				else
-					Chat:Send(player, "Invalid weaponId", serverColour)
-				end
-			end
+			Chat:Send(player, "Invalid weaponId", serverColour)
 		end
 		
 		return false
