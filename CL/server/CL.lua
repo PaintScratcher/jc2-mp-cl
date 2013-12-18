@@ -26,7 +26,7 @@ onPlayerChat = function(args)
 	if message == "/help" then
 		Chat:Send(player, "Available commands:", serverColour) 
 		Chat:Send(player, "/help /about /kill /locate", serverColour)
-		Chat:Send(player, "/getvehicle [car, plane] or <wikivalue 0 - 91>", serverColour)
+		Chat:Send(player, "/getvehicle [car, plane, random] or <wikivalue 0 - 91>", serverColour)
 		Chat:Send(player, "/sethome /gohome ", serverColour)
 		Chat:Send(player, "/gotoplayer <name>", serverColour)
 		
@@ -58,6 +58,9 @@ onPlayerChat = function(args)
 			Vehicle.Create(91, player:GetPosition(), player:GetAngle())
 		elseif type == "plane" then
 			Vehicle.Create(81, player:GetPosition(), player:GetAngle())
+		elseif type == "random" then
+			Vehicle.Create(math.random(0, 91), player:GetPosition(), player:GetAngle())
+		end
 		
 		-- Numerical value
 		else
