@@ -102,6 +102,42 @@ onPlayerChat = function(args)
 
 		return false
 	end
+	
+	if string.find(message, "/getweapon") then
+			giveWeapon = function(id)
+				player:GiveWeapon(1,Weapon(id))
+			end
+			-- Get type
+			local type = string.sub(message, 12)
+
+			-- Shortcut types
+			if type == "random" then
+				local id = math.random(0, 91)
+				if pcall(giveWeapon,id) then
+					Chat:Send(player, "Rolled weaponId " .. id, serverColour)
+				else
+					Chat:Send("Invalid Weapon ID", serverColour)
+				end
+			
+			else
+				local id = tonumber(type)
+				
+				-- If it's a valid number
+				if id != nil then
+					-- It's a valid vehicleId
+					if id >= 0 and id <= 91 then
+						if pcall(giveWeapon,id) then
+							Chat:Send(player, "Giving weapon " .. id, serverColour)
+						else
+							Chat:Send(player, "Invalid Weapon ID", serverColour)
+						end
+					else
+						Chat:Send(player, "Valid range is 0 - 91", serverColour)
+					end
+				end
+			
+			return false
+			end
 
 	-- Teleport to a player
 	if string.find(message, "/gotoplayer") then
