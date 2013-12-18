@@ -5,11 +5,19 @@ deathColour = Color(255, 10, 10, 255)
 
 -- Globals
 homes = {} -- A Table to store home location
+scores = {}
+
+onModuleLoad = function(args)
+	print("Module loaded")
+end
 
 -- When a player joins the game
 onPlayerJoin = function(args)
 	local name = args.player:GetName()
 	Chat:Broadcast(name .. " joined the game.", joinColour)
+
+	--Setup scores
+	scores[name] = 0
 end
 
 -- Player leaves
@@ -29,6 +37,7 @@ onPlayerChat = function(args)
 		Chat:Send(player, "/getvehicle [car, plane, random] or <wikivalue 0 - 91>", serverColour)
 		Chat:Send(player, "/sethome /gohome ", serverColour)
 		Chat:Send(player, "/gotoplayer <name>", serverColour)
+		Chat:Send(player, "/scores", serverColour)
 		
 		return false -- Do not show the chat message
 	end	
@@ -53,15 +62,19 @@ onPlayerChat = function(args)
 		-- Get type
 		local type = string.sub(message, 13)
 
+		--Off to the side
+		local position = player:GetPosition()
+		position.x = position.x + 20
+
 		-- Shortcut types
 		if type == "car" then
-			Vehicle.Create(91, player:GetPosition(), player:GetAngle())
+			Vehicle.Create(91, position, player:GetAngle())
 		elseif type == "plane" then
-			Vehicle.Create(81, player:GetPosition(), player:GetAngle())
+			Vehicle.Create(81, position, player:GetAngle())
 		elseif type == "random" then
 			local id = math.random(0, 91)
 			Chat:Send(player, "Rolled vehicleId " .. id, serverColour)
-			Vehicle.Create(id, player:GetPosition(), player:GetAngle())
+			Vehicle.Create(id, position, player:GetAngle())
 		
 		-- Numerical value
 		else
@@ -71,7 +84,7 @@ onPlayerChat = function(args)
 			if id != nil then
 				-- It's a valid vehicleId
 				if id >= 0 and id <= 91 then
-					Vehicle.Create(id, player:GetPosition(), player:GetAngle())
+					Vehicle.Create(id, position, player:GetAngle())
 				else
 					Chat:Send(player, "Valid range is 0 - 91", serverColour)
 				end
@@ -130,6 +143,17 @@ onPlayerChat = function(args)
 		return false
 	end
 
+	-- Scoreboard
+	if message == "/scores" then
+		Chat:Send(player, "Current Scores:", serverColour)
+
+		for key, value in pairs(scores) do
+			Chat:Send(player, key .. " - " .. value .. " kills", serverColour)
+		end
+
+		return false
+	end
+
 	return true -- Do show the message
 end
 
@@ -153,6 +177,11 @@ onPlayerDeath = function(args)
 		elseif reason == 4 then
 			msg = player .. " was caught in " .. killer .. "'s headlights."
 		end
+
+		-- Award points
+		scores[player] = scores[player] + 1
+
+	-- No killer
 	else
 		if reason == 1 then
 			msg = player .. " doesn't even lift."
@@ -173,6 +202,7 @@ Events:Subscribe("PlayerJoin", onPlayerJoin)
 Events:Subscribe("PlayerQuit", onPlayerQuit)
 Events:Subscribe("PlayerChat", onPlayerChat)
 Events:Subscribe("PlayerDeath", onPlayerDeath)
+Events:Subscribe("ModuleLoad", onModuleLoad)
 
 --------------- Lua Notes ---------------
 -- A comment is preceded by '--'
