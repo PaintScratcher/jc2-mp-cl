@@ -5,7 +5,7 @@ deathColour = Color(255, 10, 10, 255)
 
 -- Globals
 homes = {} -- A Table to store home location
-scores = {}
+kills = {}
 
 onModuleLoad = function(args)
 	print("Module loaded")
@@ -13,7 +13,7 @@ onModuleLoad = function(args)
 	local players = DefaultWorld:GetPlayers()
 
 	for p in players do
-		scores[p] = 0
+		kills[p:GetName()] = 0
 	end
 
 end
@@ -23,8 +23,8 @@ onPlayerJoin = function(args)
 	local name = args.player:GetName()
 	Chat:Broadcast(name .. " joined the game.", joinColour)
 
-	--Setup scores
-	scores[name] = 0
+	--Setup kills
+	kills[name] = 0
 end
 
 -- Player leaves
@@ -71,7 +71,7 @@ onPlayerChat = function(args)
 
 		--Off to the side
 		local position = player:GetPosition()
-		position.x = position.x + 20
+		position.x = position.x +  20
 
 		-- Shortcut types
 		if type == "car" then
@@ -154,7 +154,7 @@ onPlayerChat = function(args)
 	if message == "/scores" then
 		Chat:Send(player, "Current Scores:", serverColour)
 
-		for key, value in pairs(scores) do
+		for key, value in pairs(kills) do
 			Chat:Send(player, key .. " - " .. value .. " kills", serverColour)
 		end
 
@@ -186,7 +186,11 @@ onPlayerDeath = function(args)
 		end
 
 		-- Award points
-		scores[player] = scores[player] + 1
+		if kills[player] != nil then 
+			kills[player] = kills[player] + 1
+		else
+			Chat:Send(player, "You do not have a scores table entry!", serverColour)
+		end
 
 	-- No killer
 	else
