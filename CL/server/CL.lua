@@ -2,6 +2,7 @@
 serverColour = Color(255, 200, 200, 200)	--ABGR
 joinColour = Color(255, 10, 255, 10)
 deathColour = Color(255, 10, 10, 255)
+announceColour = Color(255, 0, 255, 255)
 
 -- Globals
 homes = {} -- A Table to store home location
@@ -16,6 +17,7 @@ onModuleLoad = function(args)
 		kills[p:GetName()] = 0
 	end
 
+	Chat:Broadcast("CL Reloaded. Reset your homes!", announceColour)
 end
 
 -- When a player joins the game
@@ -137,7 +139,12 @@ onPlayerChat = function(args)
 	--Go home
 	if message == "/gohome" then
 		local key = player:GetName()
-		player:SetPosition(homes[key])
+
+		if homes[key] != nil then
+			player:SetPosition(homes[key])
+		else
+			Chat:Send(player, "You have no home set.", serverColour)
+		end
 		
 		return false
 	end
@@ -189,7 +196,7 @@ onPlayerDeath = function(args)
 		if kills[killer] != nil then 
 			kills[killer] = kills[killer] + 1
 		else
-			Chat:Send(player, "You do not have a scores table entry!", serverColour)
+			kills[killer] = 1
 		end
 
 	-- No killer
