@@ -9,6 +9,13 @@ scores = {}
 
 onModuleLoad = function(args)
 	print("Module loaded")
+
+	local players = DefaultWorld:GetPlayers()
+
+	for p in players do
+		scores[p] = 0
+	end
+
 end
 
 -- When a player joins the game
