@@ -186,8 +186,8 @@ onPlayerDeath = function(args)
 		end
 
 		-- Award points
-		if kills[player] != nil then 
-			kills[player] = kills[player] + 1
+		if kills[killer] != nil then 
+			kills[killer] = kills[killer] + 1
 		else
 			Chat:Send(player, "You do not have a scores table entry!", serverColour)
 		end
