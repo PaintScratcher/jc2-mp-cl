@@ -59,8 +59,9 @@ onPlayerChat = function(args)
 		elseif type == "plane" then
 			Vehicle.Create(81, player:GetPosition(), player:GetAngle())
 		elseif type == "random" then
-			Vehicle.Create(math.random(0, 91), player:GetPosition(), player:GetAngle())
-		end
+			local id = math.random(0, 91)
+			Chat:Send(player, "Rolled vehicleId " .. id, serverColour)
+			Vehicle.Create(id, player:GetPosition(), player:GetAngle())
 		
 		-- Numerical value
 		else
