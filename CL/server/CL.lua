@@ -25,7 +25,7 @@ onPlayerChat = function(args)
 	-- Issue help
 	if message == "/help" then
 		Chat:Send(player, "Available commands:", serverColour) 
-		Chat:Send(player, "/help /kill /locate", serverColour)
+		Chat:Send(player, "/help /about /kill /locate", serverColour)
 		Chat:Send(player, "/getvehicle [car, plane] or <wikivalue 0 - 91>", serverColour)
 		Chat:Send(player, "/sethome /gohome ", serverColour)
 		Chat:Send(player, "/gotoplayer <name>", serverColour)
@@ -115,6 +115,14 @@ onPlayerChat = function(args)
 		local key = player:GetName()
 		player:SetPosition(homes[key])
 		
+		return false
+	end
+
+	-- About
+	if message == "/about" then
+		Chat:Send(player, "JC2-MP Module by Chris Lewis", serverColour)
+		Chat:Send(player, "Source available at http://github.com/C-D-Lewis/jc2-mp-cl", serverColour)
+
 		return false
 	end
 
