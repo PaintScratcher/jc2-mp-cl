@@ -26,7 +26,7 @@ onPlayerJoin = function(args)
 	local name = args.player:GetName()
 	
 	Chat:Broadcast(name .. " joined the game.", joinColour)
-	Chat:Send(player, "Welcome! Use /help for a list of commands.", serverColour)
+	Chat:Send(player, "Welcome! to Mani-MP! Use /help for a list of commands.", serverColour)
 
 	-- Reset kill count
 	kills[name] = 0
@@ -52,10 +52,11 @@ onPlayerChat = function(args)
 		Chat:Send(player, "Available commands:", serverColour) 
 		Chat:Send(player, "/help /about /kill /locate", serverColour)
 		Chat:Send(player, "/getvehicle [car, plane, random] or <wikivalue 0 - 91>", serverColour)
-		Chat:Send(player, "/getweapon [handgun, revolver, sawnoff, smg, assault, sniper, shotgun, rocket, grenade]", serverColour)
+		Chat:Send(player, "/getweapon [handgun, revolver, sawnoff, smg, assault, sniper, shotgun, rocket, grenade, sam, bubble, minigun, rocket2]", serverColour)
 		Chat:Send(player, "/sethome /gohome ", serverColour)
 		Chat:Send(player, "/gotoplayer <name>", serverColour)
 		Chat:Send(player, "/scores", serverColour)
+		Chat:Send(player, "/server", serverColour)
 		
 		return false -- Do not show the chat message
 	end	
@@ -84,7 +85,7 @@ onPlayerChat = function(args)
 		local type = string.sub(message, 13)
 
 		--Off to the side
-		position.x = position.x +  20 -- Northern offset
+		position.x = position.x +  10 -- Northern offset
 
 		-- Shortcut types
 		if type == "car" then
@@ -178,6 +179,10 @@ onPlayerChat = function(args)
 			id = 43
 			slot = 2
 			number = 1
+		elseif type == "rocket2" then
+			id = 66
+			slot = 2
+			numbr = 2
 		end
 
 		-- Give the weapon
@@ -244,6 +249,12 @@ onPlayerChat = function(args)
 		Chat:Send(player, "Source available at http://github.com/C-D-Lewis/jc2-mp-cl", serverColour)
 
 		return false
+	end
+	
+	--Server Info
+	if message == "/server" then
+		Chat:Send(player, "[UK] Mani-MP | Freeroam | TP | Derby | Spawn Vehicles/weapons", serverColour)
+		Chat:Send(player, "Thanks for playing!", serverColour)
 	end
 
 	-- Scoreboard
