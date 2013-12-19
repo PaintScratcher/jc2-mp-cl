@@ -4,12 +4,10 @@ joinColour = Color(255, 10, 255, 10)
 deathColour = Color(255, 10, 10, 255)
 announceColour = Color(255, 0, 255, 255)
 
--- Admin settings
-settings = {}
-
 -- Globals
-homes = {} -- A Table to store home location
-kills = {}
+homes = {}	-- A Table to store home location
+kills = {}	-- Track kills
+settings = {}	-- Admin settings
 
 -- Load admin settings
 loadAdminSettings = function(path)
@@ -423,7 +421,9 @@ onPlayerDeath = function(args)
 		end
 	end
 
-	Chat:Broadcast(msg, deathColour)
+	if settings["showdeaths"] == true then
+		Chat:Broadcast(msg, deathColour)
+	end
 end
 
 -- Subscribe to game events
