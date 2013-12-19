@@ -10,6 +10,7 @@ kills = {}	-- Track kills
 settings = {}	-- Admin settings
 admins = {} -- A table to store admin GUID's 
 
+--EVENT FUNCTIONS
 -- Load admin settings
 loadAdminSettings = function(path)
 	-- Open file
@@ -382,20 +383,13 @@ onPlayerChat = function(args)
 		if playerIsAdmin(player) == true then
 			-- Get name
 			local name = string.sub(message, 10)
-			-- Get all players matching target description
-			local results = Player.Match(name)
-
-			-- For all matching players, find exact name match
-			for index, otherplayer in ipairs(results) do -- May be redundant
-				if otherplayer:GetName() == name then
-					Chat:Send(player, "SteamId for " .. name .. ": " .. tostring(otherplayer:GetSteamId()), serverColour)
-					print("SteamId for " .. name .. ": " .. tostring(otherplayer:GetSteamId()))
-					return false
-				end
+			
+			if matchName(name) != false then
+				Chat:Send(player, "SteamId for " .. name .. ": " .. tostring(matchName(name):GetSteamId()), serverColour)
+				print("SteamId for " .. name .. ": " .. tostring(matchName(name):GetSteamId()))
+			else
+				Chat:Send(player, "No match found for player " .. name, deathColour)
 			end
-
-			-- No match
-			Chat:Send(player, "No match found for player " .. name, deathColour)
 		else
 			Chat:Send(player, "You do not have permission to run this command!", serverColour)
 		end
@@ -405,17 +399,6 @@ onPlayerChat = function(args)
 	
 	return true -- Do show the message
 end
-
-playerIsAdmin = function(player)
-	for key,value in pairs(admins) do
-			if tostring(player:GetSteamId()) == value then
-				return true
-			else 
-				return false
-			end	
-	end
-end
-	
 
 -- When a player dies
 onPlayerDeath = function(args)
@@ -467,6 +450,32 @@ onPlayerDeath = function(args)
 		Chat:Broadcast(msg, deathColour)
 	end
 end
+
+--GENERAL FUNCTIONS
+playerIsAdmin = function(player)
+	for key,value in pairs(admins) do
+			if tostring(player:GetSteamId()) == value then
+				return true
+			else 
+				return false
+			end	
+	end
+end
+
+matchName = function(name)
+	local results = Player.Match(name)
+	-- Get all players matching target description
+	local results = Player.Match(name)
+	-- For all matching players, find exact name match
+	for index, player in ipairs(results) do -- May be redundant
+		if player:GetName() == name then
+			return player
+		end
+	end
+	return false
+end
+
+
 
 -- Subscribe to game events
 Events:Subscribe("PlayerJoin", onPlayerJoin)
