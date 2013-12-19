@@ -8,7 +8,7 @@ announceColour = Color(255, 0, 255, 255)
 homes = {}	-- A Table to store home location
 kills = {}	-- Track kills
 settings = {}	-- Admin settings
-admins = {}
+admins = {} -- A table to store admin GUID's 
 
 -- Load admin settings
 loadAdminSettings = function(path)
@@ -37,6 +37,7 @@ loadAdminSettings = function(path)
 					settings[prefix] = false
 				elseif prefix == "admin" then
 					table.insert(admins,suffix)
+					settings[prefix] = suffix
 				else
 					settings[prefix] = suffix	-- Plain text, such as MOTD
 				end
@@ -377,9 +378,17 @@ onPlayerChat = function(args)
 
 	--ADMIN COMMANDS
 	if message == "!guid" then
-		Chat:Send(player, tostring(player:GetSteamId()), serverColour)
-		print(tostring(player:GetSteamId()))
-		
+		for key,value in pairs(admins) do
+			if tostring(player:GetSteamId()) == value then
+				admin = true
+			end
+		end
+		if admin == true then
+			Chat:Send(player, tostring(player:GetSteamId()), serverColour)
+			print(tostring(player:GetSteamId()))
+		else
+			Chat:Send(player, "You do not have permission to run this command", serverColour)
+		end
 		return false
 	end
 	
