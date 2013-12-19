@@ -167,13 +167,17 @@ onPlayerChat = function(args)
 		elseif type == "grenade" then
 			id = 17
 		elseif type == "sam" then
-				id = 31
-				slot = 2
-				number = 1
+			id = 31
+			slot = 2
+			number = 1
 		elseif type == "minigun" then
-				id = 26
-				slot = 2
-				number = 1
+			id = 26
+			slot = 2
+			number = 1
+		elseif type == "bubble" then
+			id = 43
+			slot = 2
+			number = 1
 		end
 
 		-- Give the weapon
