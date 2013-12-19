@@ -65,7 +65,7 @@ onModuleLoad = function(args)
 	end
 
 	-- Notify
-	Chat:Broadcast("CL Reloaded. Reset your homes!", announceColour)
+	Chat:Broadcast("CL Module Reloaded. Reset your homes!", announceColour)
 	print("Module loaded")
 end
 
@@ -82,6 +82,7 @@ onPlayerJoin = function(args)
 end
 
 -- Player leaves
+onPlayerQuit = function(args)
 onPlayerQuit = function(args)
 	Chat:Broadcast(args.player:GetName() .. " left the game.", joinColour)
 end
@@ -353,7 +354,7 @@ onPlayerChat = function(args)
 
 	-- List players
 	if message == "/players" then
-		Chat:Send(player, "Current Players online:", serverColour)
+		Chat:Send(player, "Current players online:", serverColour)
 		for p in Server:GetPlayers() do
 			Chat:Send(player, p:GetName(), serverColour)
 		end
