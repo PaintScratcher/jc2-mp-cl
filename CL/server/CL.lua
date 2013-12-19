@@ -357,7 +357,7 @@ onPlayerChat = function(args)
 	if message == "/players" then
 		Chat:Send(player, "Current Players online:", serverColour)
 		for p in Server:GetPlayers() do
-			Chat:Send(player, player:GetName(), serverColour)
+			Chat:Send(player, p:GetName(), serverColour)
 		end
 
 		return false
