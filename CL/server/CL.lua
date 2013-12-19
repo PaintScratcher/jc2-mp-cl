@@ -57,6 +57,7 @@ onPlayerChat = function(args)
 		Chat:Send(player, "/gotoplayer <name>", serverColour)
 		Chat:Send(player, "/scores", serverColour)
 		Chat:Send(player, "/server", serverColour)
+		Chat:Send(player, "/players", serverColour)
 		
 		return false -- Do not show the chat message
 	end	
@@ -251,10 +252,18 @@ onPlayerChat = function(args)
 		return false
 	end
 	
-	--Server Info
+	-- Server Info
 	if message == "/server" then
 		Chat:Send(player, "[UK] Mani-MP | Freeroam | TP | Derby | Spawn Vehicles/weapons", serverColour)
 		Chat:Send(player, "Thanks for playing!", serverColour)
+	end
+	
+	-- Online 
+	if message == "/players" then
+		Chat:Send(player, "Current Players online:", serverColour)
+		for player in Server:GetPlayers() do
+			Chat:Send(player,player:GetName(), serverColour)
+		end
 	end
 
 	-- Scoreboard
