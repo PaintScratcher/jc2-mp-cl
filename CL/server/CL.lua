@@ -11,6 +11,7 @@ kills = {}
 onModuleLoad = function(args)
 	print("Module loaded")
 
+	-- Setup kills table for all current players
 	for p in Server:GetPlayers() do
 		kills[p:GetName()] = 0
 	end
@@ -42,7 +43,7 @@ onPlayerChat = function(args)
 		Chat:Send(player, "Available commands:", serverColour) 
 		Chat:Send(player, "/help /about /kill /locate", serverColour)
 		Chat:Send(player, "/getvehicle [car, plane, random] or <wikivalue 0 - 91>", serverColour)
-		Chat:Send(player, "/getweapon [handgun, revolver, sawnoff]", serverColour)
+		Chat:Send(player, "/getweapon [handgun, revolver, sawnoff, smg, assault, sniper, shotgun, rocket, grenade]", serverColour)
 		Chat:Send(player, "/sethome /gohome ", serverColour)
 		Chat:Send(player, "/gotoplayer <name>", serverColour)
 		Chat:Send(player, "/scores", serverColour)
@@ -117,22 +118,38 @@ onPlayerChat = function(args)
 
 		-- Get type, then id
 		local type = string.sub(message, 12)
-		local id = 2
+		local id = 0
 
 		-- Turn name into id
 		if type == "handgun" then
 			id = 2
 		elseif type == "revolver" then
 			id = 4
+		elseif type == "smg" then
+			id = 5
 		elseif type == "sawnoff" then
 			id = 6
+		elseif type == "assault" then
+			id = 11
+		elseif type == "shotgun" then
+			id = 13
+		elseif type == "sniper" then
+			id = 14
+		elseif type == "rocket" then
+			id = 16
+		elseif type == "grenade" then
+			id = 17
 		end
 
 		-- Give the weapon
-		if pcall(giveWeapon, id) then
-			-- Success! No notification for now
+		if id > 0 then
+			if pcall(giveWeapon, id) then
+				-- Success! No notification for now
+			else
+				Chat:Send(player, "Invalid weaponId", serverColour)
+			end
 		else
-			Chat:Send(player, "Invalid weaponId", serverColour)
+			Chat:Send(player, "Invalid weapon type. See /help for list.", serverColour)
 		end
 		
 		return false
