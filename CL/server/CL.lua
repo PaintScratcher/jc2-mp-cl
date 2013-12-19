@@ -377,23 +377,45 @@ onPlayerChat = function(args)
 	end
 
 	--ADMIN COMMANDS
-	if message == "!guid" then
-		for key,value in pairs(admins) do
-			if tostring(player:GetSteamId()) == value then
-				admin = true
+	if string.find(message, "!steamid") then
+
+		if playerIsAdmin(player) == true then
+			-- Get name
+			local name = string.sub(message, 10)
+			-- Get all players matching target description
+			local results = Player.Match(name)
+
+			-- For all matching players, find exact name match
+			for index, otherplayer in ipairs(results) do -- May be redundant
+				if otherplayer:GetName() == name then
+					Chat:Send(player, "SteamId for " .. name .. ": " .. tostring(otherplayer:GetSteamId()), serverColour)
+					print("SteamId for " .. name .. ": " .. tostring(otherplayer:GetSteamId()))
+					return false
+				end
 			end
-		end
-		if admin == true then
-			Chat:Send(player, tostring(player:GetSteamId()), serverColour)
-			print(tostring(player:GetSteamId()))
+
+			-- No match
+			Chat:Send(player, "No match found for player " .. name, deathColour)
 		else
-			Chat:Send(player, "You do not have permission to run this command", serverColour)
+			Chat:Send(player, "You do not have permission to run this command!", serverColour)
 		end
+		
 		return false
 	end
 	
 	return true -- Do show the message
 end
+
+playerIsAdmin = function(player)
+	for key,value in pairs(admins) do
+			if tostring(player:GetSteamId()) == value then
+				return true
+			else 
+				return false
+			end	
+	end
+end
+	
 
 -- When a player dies
 onPlayerDeath = function(args)
