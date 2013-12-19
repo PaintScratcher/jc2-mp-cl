@@ -166,12 +166,20 @@ onPlayerChat = function(args)
 			number = 1
 		elseif type == "grenade" then
 			id = 17
+		elseif type == "sam" then
+				id = 31
+				slot = 2
+				number = 1
+		elseif type == "minigun" then
+				id = 26
+				slot = 2
+				number = 1
 		end
 
 		-- Give the weapon
 		if id > 0 then
 			if pcall(giveWeapon, id, slot, number) then
-				-- Success! No notification for now
+				Chat:Send(player, "Gave weapon: " .. type, serverColour)
 			else
 				Chat:Send(player, "Invalid weaponId", serverColour)
 			end
