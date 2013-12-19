@@ -4,20 +4,65 @@ joinColour = Color(255, 10, 255, 10)
 deathColour = Color(255, 10, 10, 255)
 announceColour = Color(255, 0, 255, 255)
 
+-- Admin settings
+settings = {}
+
 -- Globals
 homes = {} -- A Table to store home location
 kills = {}
 
+-- Load admin settings
+loadAdminSettings = function(path)
+	-- Open file
+	local file = io.open(path, "r")
+
+	-- For whole file
+	while true do
+		-- Get next line
+		local line = file:read("*line")
+
+		-- While file has lines
+		if line != nil then
+			-- Get divider
+			local s, e = string.find(line, "=")
+
+			-- If found
+			if s != nil and e != nil then
+				local prefix = string.sub(line, 0, s - 1)
+				local suffix = string.sub(line, e + 1)
+
+				-- Any setting!
+				settings[prefix] = (suffix == "true") and true or false	--Quasi-ternary operator
+
+				-- Show in console
+				print(prefix, settings[prefix])
+			else
+				print("ERROR: Parsing line: " .. line)
+			end			
+		else
+			break
+		end
+	end
+
+	--Finally
+	file:close()
+end
+
 -- When the module is loaded
 onModuleLoad = function(args)
-	print("Module loaded")
+	print("Setting up...")
+
+	-- Load file settings
+	loadAdminSettings("settings.cfg")
 
 	-- Setup kills table for all current players
 	for player in Server:GetPlayers() do
 		kills[player:GetName()] = 0
 	end
 
+	-- Notify
 	Chat:Broadcast("CL Reloaded. Reset your homes!", announceColour)
+	print("Module loaded")
 end
 
 -- When a player joins the game
@@ -26,7 +71,7 @@ onPlayerJoin = function(args)
 	local name = args.player:GetName()
 	
 	Chat:Broadcast(name .. " joined the game.", joinColour)
-	Chat:Send(player, "Welcome! to Mani-MP! Use /help for a list of commands.", serverColour)
+	Chat:Send(player, "Welcome! Use /help for a list of commands.", serverColour)
 
 	-- Reset kill count
 	kills[name] = 0
@@ -52,12 +97,10 @@ onPlayerChat = function(args)
 		Chat:Send(player, "Available commands:", serverColour) 
 		Chat:Send(player, "/help /about /kill /locate", serverColour)
 		Chat:Send(player, "/getvehicle [car, plane, random] or <wikivalue 0 - 91>", serverColour)
-		Chat:Send(player, "/getweapon [handgun, revolver, sawnoff, smg, assault, sniper, shotgun, rocket, grenade, sam, bubble, minigun, rocket2]", serverColour)
+		Chat:Send(player, "/getweapon [handgun, revolver, sawnoff, smg, assault, sniper, shotgun, rocket, grenade]", serverColour)
 		Chat:Send(player, "/sethome /gohome ", serverColour)
 		Chat:Send(player, "/gotoplayer <name>", serverColour)
 		Chat:Send(player, "/scores", serverColour)
-		Chat:Send(player, "/server", serverColour)
-		Chat:Send(player, "/players", serverColour)
 		
 		return false -- Do not show the chat message
 	end	
@@ -78,123 +121,135 @@ onPlayerChat = function(args)
 
 	-- Spawn vehicles
 	if string.find(message, "/getvehicle") then
-		createVehicle = function(id, position)
-			Vehicle.Create(id, position, player:GetAngle())
-		end
-
-		-- Get type
-		local type = string.sub(message, 13)
-
-		--Off to the side
-		position.x = position.x +  10 -- Northern offset
-
-		-- Shortcut types
-		if type == "car" then
-			Vehicle.Create(91, position, player:GetAngle())
-		elseif type == "plane" then
-			Vehicle.Create(81, position, player:GetAngle())
-		elseif type == "random" then
-			local id = math.random(0, 91)
-			Chat:Send(player, "Rolled vehicleId " .. id, serverColour)
-			if pcall(createVehicle, id, position) then
-				-- Success!
-			else	
-				Chat:Send(player, "Invalid vehicleId! Try again.", serverColour)
-			end
-		
-		-- Numerical value
-		else
-			local id = tonumber(type)
-			
-			-- If it's a valid number
-			if id != nil then
-				-- It's a valid vehicleId
-				if id >= 0 and id <= 91 then
+		if settings["allowvehicles"] != nil then
+			if settings["allowvehicles"] == true then
+				createVehicle = function(id, position)
 					Vehicle.Create(id, position, player:GetAngle())
-				else
-					Chat:Send(player, "Valid range is 0 - 91", serverColour)
 				end
+
+				-- Get type
+				local type = string.sub(message, 13)
+
+				--Off to the side
+				position.x = position.x +  20 -- Northern offset
+
+				-- Shortcut types
+				if type == "car" then
+					Vehicle.Create(91, position, player:GetAngle())
+				elseif type == "plane" then
+					Vehicle.Create(81, position, player:GetAngle())
+				elseif type == "random" then
+					local id = math.random(0, 91)
+					Chat:Send(player, "Rolled vehicleId " .. id, serverColour)
+					if pcall(createVehicle, id, position) then
+						-- Success!
+					else	
+						Chat:Send(player, "Invalid vehicleId! Try again.", serverColour)
+					end
+				
+				-- Numerical value
+				else
+					local id = tonumber(type)
+					
+					-- If it's a valid number
+					if id != nil then
+						-- It's a valid vehicleId
+						if id >= 0 and id <= 91 then
+							Vehicle.Create(id, position, player:GetAngle())
+						else
+							Chat:Send(player, "Valid range is 0 - 91", serverColour)
+						end
+					end
+				end
+			else
+				Chat:Send(player, "Vehicle spawns are not allowed!", serverColour)
 			end
+		else
+			print("ERROR: 'allowvehicles' setting not set!")
 		end
 
 		return false
 	end
 	
 	if string.find(message, "/getweapon") then
-		-- Slots 0, 1 or 2 -> Left, Right or Primary
-		giveWeapon = function(id, slot, number)
-			if slot != 2 then
-				if number == 1 then	-- Two-H
-					player:GiveWeapon(0, Weapon(id))
-				elseif number == 2 then	-- Duel wield!
-					player:GiveWeapon(0, Weapon(id))
-					player:GiveWeapon(1, Weapon(id))
+		if settings["allowweapons"] != nil then
+			if settings["allowweapons"] == true then
+				-- Slots 0, 1 or 2 -> Left, Right or Primary
+				giveWeapon = function(id, slot, number)
+					if slot != 2 then
+						if number == 1 then	-- Two-H
+							player:GiveWeapon(0, Weapon(id))
+						elseif number == 2 then	-- Duel wield!
+							player:GiveWeapon(0, Weapon(id))
+							player:GiveWeapon(1, Weapon(id))
+						end
+					else
+						player:GiveWeapon(2, Weapon(id))
+					end
+				end
+
+				-- Get type, then id
+				local type = string.sub(message, 12)
+				local id = 0
+				local slot = 0	-- Primary
+				local number = 2 -- Both hands
+
+				-- Turn name into id
+				if type == "handgun" then
+					id = 2
+				elseif type == "revolver" then
+					id = 4
+				elseif type == "smg" then
+					id = 5
+				elseif type == "sawnoff" then
+					id = 6
+				elseif type == "assault" then
+					id = 11
+					slot = 2
+					number = 1
+				elseif type == "shotgun" then
+					id = 13
+					slot = 2
+					number = 1
+				elseif type == "sniper" then
+					id = 14
+					slot = 2
+					number = 1
+				elseif type == "rocket" then
+					id = 16
+					slot = 2
+					number = 1
+				elseif type == "grenade" then
+					id = 17
+				elseif type == "sam" then
+					id = 31
+					slot = 2
+					number = 1
+				elseif type == "minigun" then
+					id = 26
+					slot = 2
+					number = 1
+				elseif type == "bubble" then
+					id = 43
+					slot = 2
+					number = 1
+				end
+
+				-- Give the weapon
+				if id > 0 then
+					if pcall(giveWeapon, id, slot, number) then
+						Chat:Send(player, "Gave weapon: " .. type, serverColour)
+					else
+						Chat:Send(player, "Invalid weaponId", serverColour)
+					end
+				else
+					Chat:Send(player, "Invalid weapon type. See /help for list.", serverColour)
 				end
 			else
-				player:GiveWeapon(2, Weapon(id))
-			end
-		end
-
-		-- Get type, then id
-		local type = string.sub(message, 12)
-		local id = 0
-		local slot = 0
-		local number = 2
-
-		-- Turn name into id
-		if type == "handgun" then
-			id = 2
-		elseif type == "revolver" then
-			id = 4
-		elseif type == "smg" then
-			id = 5
-		elseif type == "sawnoff" then
-			id = 6
-		elseif type == "assault" then
-			id = 11
-			slot = 2
-			number = 1
-		elseif type == "shotgun" then
-			id = 13
-			slot = 2
-			number = 1
-		elseif type == "sniper" then
-			id = 14
-			slot = 2
-			number = 1
-		elseif type == "rocket" then
-			id = 16
-			slot = 2
-			number = 1
-		elseif type == "grenade" then
-			id = 17
-		elseif type == "sam" then
-			id = 31
-			slot = 2
-			number = 1
-		elseif type == "minigun" then
-			id = 26
-			slot = 2
-			number = 1
-		elseif type == "bubble" then
-			id = 43
-			slot = 2
-			number = 1
-		elseif type == "rocket2" then
-			id = 66
-			slot = 2
-			numbr = 2
-		end
-
-		-- Give the weapon
-		if id > 0 then
-			if pcall(giveWeapon, id, slot, number) then
-				Chat:Send(player, "Gave weapon: " .. type, serverColour)
-			else
-				Chat:Send(player, "Invalid weaponId", serverColour)
+				Chat:Send(player, "Weapons are not allowed!", serverColour)
 			end
 		else
-			Chat:Send(player, "Invalid weapon type. See /help for list.", serverColour)
+			print("ERROR: 'allowweapons' setting not set!")
 		end
 		
 		return false
@@ -202,43 +257,66 @@ onPlayerChat = function(args)
 
 	-- Teleport to a player
 	if string.find(message, "/gotoplayer") then
-		-- Get name
-		local target = string.sub(message, 13)
+		if settings["allowteleports"] != nil then
+			if settings["allowteleports"] == true then
+				-- Get name
+				local target = string.sub(message, 13)
 
-		-- Get all players matching target description
-		local results = Player.Match(target)
+				-- Get all players matching target description
+				local results = Player.Match(target)
 
-		-- For all matching players, find exact name match
-		for index, otherplayer in ipairs(results) do -- May be redundant
-			if otherplayer:GetName() == target then
-				player:SetPosition(otherplayer:GetPosition())
-				Chat:Broadcast("Teleported " .. playerName .. " to " .. otherplayer:GetName(), serverColour)
+				-- For all matching players, find exact name match
+				for index, otherplayer in ipairs(results) do -- May be redundant
+					if otherplayer:GetName() == target then
+						player:SetPosition(otherplayer:GetPosition())
+						Chat:Broadcast("Teleported " .. playerName .. " to " .. otherplayer:GetName(), serverColour)
 
-				return false
+						return false
+					end
+				end
+
+				-- No match
+				Chat:Send(player, "No match found for player " .. target, deathColour)
+			else
+				Chat:Send(player, "Teleporting not allowed!", serverColour)
 			end
+		else
+			print("ERROR: 'allowteleports' setting not set!")
 		end
-
-		-- No match
-		Chat:Send(player, "No match found for player " .. target, deathColour)
 
 		return false
 	end
 
 	-- Set player home
 	if message == "/sethome" then
-		homes[playerName] = player:GetPosition()
-		Chat:Send(player, "Home set!", serverColour)
+		if settings["allowteleports"] != nil then
+			if settings["allowteleports"] == true then
+				homes[playerName] = player:GetPosition()
+				Chat:Send(player, "Home set!", serverColour)
+			else
+				Chat:Send(player, "Teleporting not allowed!", serverColour)
+			end
+		else
+			print("ERROR: 'allowteleports' setting not set!")
+		end
 
 		return false
 	end
 
 	--Go home
 	if message == "/gohome" then
-
-		if homes[playerName] != nil then
-			player:SetPosition(homes[playerName])
+		if settings["allowteleports"] != nil then
+			if settings["allowteleports"] == true then
+				if homes[playerName] != nil then
+					player:SetPosition(homes[playerName])
+				else
+					Chat:Send(player, "You have no home set. Use /sethome to set one.", serverColour)
+				end
+			else
+				Chat:Send(player, "Teleporting not allowed!", serverColour)
+			end
 		else
-			Chat:Send(player, "You have no home set. Use /sethome to set one.", serverColour)
+			print("ERROR: 'allowteleports' setting not set!")
 		end
 		
 		return false
@@ -246,24 +324,10 @@ onPlayerChat = function(args)
 
 	-- About
 	if message == "/about" then
-		Chat:Send(player, "JC2-MP Module 'CL' by Chris Lewis", serverColour)
+		Chat:Send(player, "JC2-MP Module 'CL' by Chris Lewis and Adam Taylor", serverColour)
 		Chat:Send(player, "Source available at http://github.com/C-D-Lewis/jc2-mp-cl", serverColour)
 
 		return false
-	end
-	
-	-- Server Info
-	if message == "/server" then
-		Chat:Send(player, "[UK] Mani-MP | Freeroam | TP | Derby | Spawn Vehicles/weapons", serverColour)
-		Chat:Send(player, "Thanks for playing!", serverColour)
-	end
-	
-	-- Online 
-	if message == "/players" then
-		Chat:Send(player, "Current Players online:", serverColour)
-		for player in Server:GetPlayers() do
-			Chat:Send(player,player:GetName(), serverColour)
-		end
 	end
 
 	-- Scoreboard

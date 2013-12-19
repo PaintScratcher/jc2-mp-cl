@@ -15,7 +15,7 @@ Available commands:
 
 /getvehicle [car, plane, random] <wiki vehicleId 0 - 91> - Spawn a vehicle. Car and Plane are convenience shortcuts.
 
-/getweapon [handgun, revolver, smg, sawnoff, assault, shotgun, sniper, rocket, grenade]
+/getweapon [handgun, revolver, smg, sawnoff, assault, shotgun, sniper, rocket, grenade, sam, bubble, rocket2]
 
 /sethome - Set the player's current position as 'home'.
 
@@ -24,3 +24,13 @@ Available commands:
 /gotoplayer <name> - Set the player's position to another player's position by their case-sensitive name.
 
 /scores - See the scoreboard
+
+
+
+Available admin settings in 'settings.cfg'
+
+allowweapons <true/false>
+
+allowteleports <true/false>
+
+allowvehicles <true/false>
