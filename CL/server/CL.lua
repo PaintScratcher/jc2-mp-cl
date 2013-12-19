@@ -8,6 +8,7 @@ announceColour = Color(255, 0, 255, 255)
 homes = {}	-- A Table to store home location
 kills = {}	-- Track kills
 settings = {}	-- Admin settings
+admins = {}
 
 -- Load admin settings
 loadAdminSettings = function(path)
@@ -34,6 +35,8 @@ loadAdminSettings = function(path)
 					settings[prefix] = true
 				elseif suffix == "false" then
 					settings[prefix] = false
+				elseif prefix == "admin" then
+					table.insert(admins,suffix)
 				else
 					settings[prefix] = suffix	-- Plain text, such as MOTD
 				end
@@ -82,7 +85,6 @@ onPlayerJoin = function(args)
 end
 
 -- Player leaves
-onPlayerQuit = function(args)
 onPlayerQuit = function(args)
 	Chat:Broadcast(args.player:GetName() .. " left the game.", joinColour)
 end
@@ -373,6 +375,14 @@ onPlayerChat = function(args)
 		return false
 	end
 
+	--ADMIN COMMANDS
+	if message == "!guid" then
+		Chat:Send(player, tostring(player:GetSteamId()), serverColour)
+		print(tostring(player:GetSteamId()))
+		
+		return false
+	end
+	
 	return true -- Do show the message
 end
 
