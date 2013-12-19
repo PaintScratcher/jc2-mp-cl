@@ -3,34 +3,20 @@ jc2-mp-cl
 
 A base script for Just Cause 2 Multiplayer Mod.
 
-Available commands:
 
-/help - Issue this list of commands
+<u>Available commands</u>
 
-/about - Show about info
-
-/kill - Kill the player
-
-/locate - Show the player's current position
-
-/getvehicle [car, plane, random] <wiki vehicleId 0 - 91> - Spawn a vehicle. Car and Plane are convenience shortcuts.
-
-/getweapon [handgun, revolver, smg, sawnoff, assault, shotgun, sniper, rocket, grenade, sam, bubble, rocket2]
-
-/sethome - Set the player's current position as 'home'.
-
-/gohome - Set the player's current position to their 'home'.
-
-/gotoplayer <name> - Set the player's position to another player's position by their case-sensitive name.
-
-/scores - See the scoreboard
+Type '/help' for list of commands.
 
 
+<u>Available admin settings in 'settings.cfg':</u>u>
 
-Available admin settings in 'settings.cfg'
+allowweapons=<true/false>	- Allow players to spawn weapons
 
-allowweapons <true/false>
+allowteleports=<true/false>	- Allow players to set/go homes and to each other
 
-allowteleports <true/false>
+allowvehicles=<true/false>	- Allow players to create vehicle spawns
 
-allowvehicles <true/false>
+motd=<string>				- Set the on-join message of the day
+
+serverinfo=<string>			- Set the /server info

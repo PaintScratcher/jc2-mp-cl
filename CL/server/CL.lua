@@ -32,7 +32,13 @@ loadAdminSettings = function(path)
 				local suffix = string.sub(line, e + 1)
 
 				-- Any setting!
-				settings[prefix] = (suffix == "true") and true or false	--Quasi-ternary operator
+				if suffix == "true" then
+					settings[prefix] = true
+				elseif suffix == "false" then
+					settings[prefix] = false
+				else
+					settings[prefix] = suffix	-- Plain text, such as MOTD
+				end
 
 				-- Show in console
 				print(prefix, settings[prefix])
@@ -71,7 +77,7 @@ onPlayerJoin = function(args)
 	local name = args.player:GetName()
 	
 	Chat:Broadcast(name .. " joined the game.", joinColour)
-	Chat:Send(player, "Welcome! Use /help for a list of commands.", serverColour)
+	Chat:Send(player, settings["motd"], serverColour)
 
 	-- Reset kill count
 	kills[name] = 0
@@ -95,12 +101,12 @@ onPlayerChat = function(args)
 	-- Issue help
 	if message == "/help" then
 		Chat:Send(player, "Available commands:", serverColour) 
-		Chat:Send(player, "/help /about /kill /locate", serverColour)
+		Chat:Send(player, "/help /kill /locate", serverColour)
 		Chat:Send(player, "/getvehicle [car, plane, random] or <wikivalue 0 - 91>", serverColour)
-		Chat:Send(player, "/getweapon [handgun, revolver, sawnoff, smg, assault, sniper, shotgun, rocket, grenade]", serverColour)
+		Chat:Send(player, "/getweapon [handgun, revolver, sawnoff, smg, assault, sniper, shotgun, rocket, grenade, sam, bubble, minigun, rocket2]", serverColour)
 		Chat:Send(player, "/sethome /gohome ", serverColour)
 		Chat:Send(player, "/gotoplayer <name>", serverColour)
-		Chat:Send(player, "/scores", serverColour)
+		Chat:Send(player, "/scores /about /server /players", serverColour)
 		
 		return false -- Do not show the chat message
 	end	
@@ -131,7 +137,7 @@ onPlayerChat = function(args)
 				local type = string.sub(message, 13)
 
 				--Off to the side
-				position.x = position.x +  20 -- Northern offset
+				position.x = position.x +  10 -- Northern offset
 
 				-- Shortcut types
 				if type == "car" then
@@ -233,6 +239,10 @@ onPlayerChat = function(args)
 					id = 43
 					slot = 2
 					number = 1
+				elseif type == "rocket2" then
+					id = 66
+					slot = 2
+					number = 2
 				end
 
 				-- Give the weapon
@@ -308,7 +318,13 @@ onPlayerChat = function(args)
 		if settings["allowteleports"] != nil then
 			if settings["allowteleports"] == true then
 				if homes[playerName] != nil then
-					player:SetPosition(homes[playerName])
+					local pos = homes[playerName]
+
+					-- Stop falling through terrain
+					pos.y = pos.y + 5	
+					
+					-- Go there
+					player:SetPosition(pos)
 				else
 					Chat:Send(player, "You have no home set. Use /sethome to set one.", serverColour)
 				end
@@ -326,6 +342,23 @@ onPlayerChat = function(args)
 	if message == "/about" then
 		Chat:Send(player, "JC2-MP Module 'CL' by Chris Lewis and Adam Taylor", serverColour)
 		Chat:Send(player, "Source available at http://github.com/C-D-Lewis/jc2-mp-cl", serverColour)
+
+		return false
+	end
+
+	-- Server info
+	if message == "/server" then
+		Chat:Send(player, settings["serverinfo"], serverColour)
+
+		return false
+	end
+
+	-- List players
+	if message == "/players" then
+		Chat:Send(player, "Current Players online:", serverColour)
+		for p in Server:GetPlayers() do
+			Chat:Send(player, player:GetName(), serverColour)
+		end
 
 		return false
 	end

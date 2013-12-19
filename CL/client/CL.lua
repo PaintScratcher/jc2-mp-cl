@@ -10,7 +10,7 @@ function CL:ModulesLoad()
         {
             name = "CL",
             text = 
-                "JC2-MP Module 'CL' by Chris Lewis \n\n" ..
+                "JC2-MP Module 'CL' by Chris Lewis and Adam Taylor\n\n" ..
 				"Source available at http://github.com/C-D-Lewis/jc2-mp-cl\n\n" ..
 				"/help for list of commands" 
         } )
