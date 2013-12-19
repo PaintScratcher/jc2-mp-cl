@@ -3,6 +3,7 @@ serverColour = Color(255, 200, 200, 200)	--ABGR
 joinColour = Color(255, 10, 255, 10)
 deathColour = Color(255, 10, 10, 255)
 announceColour = Color(255, 0, 255, 255)
+adminColour = Color(255, 10, 10, 255)
 
 -- Globals
 homes = {}	-- A Table to store home location
@@ -380,20 +381,62 @@ onPlayerChat = function(args)
 	--ADMIN COMMANDS
 	if string.find(message, "!steamid") then
 
-		if playerIsAdmin(player) == true then
-			-- Get name
+		if playerIsAdmin(player) then
 			local name = string.sub(message, 10)
 			
 			if matchName(name) != false then
-				Chat:Send(player, "SteamId for " .. name .. ": " .. tostring(matchName(name):GetSteamId()), serverColour)
+				Chat:Send(player, "SteamId for " .. name .. ": " .. tostring(matchName(name):GetSteamId()), adminColour)
 				print("SteamId for " .. name .. ": " .. tostring(matchName(name):GetSteamId()))
 			else
-				Chat:Send(player, "No match found for player " .. name, deathColour)
+				Chat:Send(player, "No match found for player " .. name, serverColour)
 			end
+			
 		else
-			Chat:Send(player, "You do not have permission to run this command!", serverColour)
+			Chat:Send(player, "You do not have permission to run this command!", adminColour)
 		end
 		
+		return false
+	end
+	
+	if string.find(message, "!kick")then
+		if playerIsAdmin(player) then
+			local name = string.sub(message, 7)
+			
+			if matchName(name) != false then
+				Chat:Send(player, "KICKING " .. name, adminColour)
+				print("KICKING " .. name)
+				matchName(name):Kick()
+			else
+				Chat:Send(player, "No match found for player " .. name, serverColour)
+			end
+		else
+			Chat:Send(player, "You do not have permission to run this command!", adminColour)
+		end
+		
+		return false
+	end
+	
+	if string.find(message, "!ban")then
+		if playerIsAdmin(player) then
+			local name = string.sub(message, 6)
+			
+			if matchName(name) != false then
+				Chat:Send(player, "BANNING " .. name, adminColour)
+				print("BANNING " .. name)
+				matchName(name):Ban()
+			else
+				Chat:Send(player, "No match found for player " .. name, serverColour)
+			end
+		else
+			Chat:Send(player, "You do not have permission to run this command!", adminColour)
+		end
+		
+		return false
+	end
+	
+	if message == "!adminhelp" then
+		Chat:Send(player, "Available commands:", serverColour) 
+		Chat:Send(player, "!steamid !kick !ban", serverColour)
 		return false
 	end
 	
