@@ -3,12 +3,15 @@ serverColour = Color(255, 200, 200, 200)	--ABGR
 joinColour = Color(255, 10, 255, 10)
 deathColour = Color(255, 10, 10, 255)
 announceColour = Color(255, 0, 255, 255)
+adminColour = Color(255, 10, 10, 255)
 
 -- Globals
 homes = {}	-- A Table to store home location
 kills = {}	-- Track kills
 settings = {}	-- Admin settings
+admins = {} -- A table to store admin GUID's 
 
+--EVENT FUNCTIONS
 -- Load admin settings
 loadAdminSettings = function(path)
 	-- Open file
@@ -34,6 +37,9 @@ loadAdminSettings = function(path)
 					settings[prefix] = true
 				elseif suffix == "false" then
 					settings[prefix] = false
+				elseif prefix == "admin" then
+					table.insert(admins,suffix)
+					settings[prefix] = suffix
 				else
 					settings[prefix] = suffix	-- Plain text, such as MOTD
 				end
@@ -65,7 +71,7 @@ onModuleLoad = function(args)
 	end
 
 	-- Notify
-	Chat:Broadcast("CL Reloaded. Reset your homes!", announceColour)
+	Chat:Broadcast("CL Module Reloaded. Reset your homes!", announceColour)
 	print("Module loaded")
 end
 
@@ -353,7 +359,7 @@ onPlayerChat = function(args)
 
 	-- List players
 	if message == "/players" then
-		Chat:Send(player, "Current Players online:", serverColour)
+		Chat:Send(player, "Current players online:", serverColour)
 		for p in Server:GetPlayers() do
 			Chat:Send(player, p:GetName(), serverColour)
 		end
@@ -372,6 +378,68 @@ onPlayerChat = function(args)
 		return false
 	end
 
+	--ADMIN COMMANDS
+	if string.find(message, "!steamid") then
+
+		if playerIsAdmin(player) then
+			local name = string.sub(message, 10)
+			
+			if matchName(name) != false then
+				Chat:Send(player, "SteamId for " .. name .. ": " .. tostring(matchName(name):GetSteamId()), adminColour)
+				print("SteamId for " .. name .. ": " .. tostring(matchName(name):GetSteamId()))
+			else
+				Chat:Send(player, "No match found for player " .. name, serverColour)
+			end
+			
+		else
+			Chat:Send(player, "You do not have permission to run this command!", adminColour)
+		end
+		
+		return false
+	end
+	
+	if string.find(message, "!kick")then
+		if playerIsAdmin(player) then
+			local name = string.sub(message, 7)
+			
+			if matchName(name) != false then
+				Chat:Send(player, "KICKING " .. name, adminColour)
+				print("KICKING " .. name)
+				matchName(name):Kick()
+			else
+				Chat:Send(player, "No match found for player " .. name, serverColour)
+			end
+		else
+			Chat:Send(player, "You do not have permission to run this command!", adminColour)
+		end
+		
+		return false
+	end
+	
+	if string.find(message, "!ban")then
+		if playerIsAdmin(player) then
+			local name = string.sub(message, 6)
+			
+			if matchName(name) != false then
+				Chat:Send(player, "BANNING " .. name, adminColour)
+				print("BANNING " .. name)
+				matchName(name):Ban()
+			else
+				Chat:Send(player, "No match found for player " .. name, serverColour)
+			end
+		else
+			Chat:Send(player, "You do not have permission to run this command!", adminColour)
+		end
+		
+		return false
+	end
+	
+	if message == "!adminhelp" then
+		Chat:Send(player, "Available commands:", serverColour) 
+		Chat:Send(player, "!steamid !kick !ban", serverColour)
+		return false
+	end
+	
 	return true -- Do show the message
 end
 
@@ -425,6 +493,32 @@ onPlayerDeath = function(args)
 		Chat:Broadcast(msg, deathColour)
 	end
 end
+
+--GENERAL FUNCTIONS
+playerIsAdmin = function(player)
+	for key,value in pairs(admins) do
+			if tostring(player:GetSteamId()) == value then
+				return true
+			else 
+				return false
+			end	
+	end
+end
+
+matchName = function(name)
+	local results = Player.Match(name)
+	-- Get all players matching target description
+	local results = Player.Match(name)
+	-- For all matching players, find exact name match
+	for index, player in ipairs(results) do -- May be redundant
+		if player:GetName() == name then
+			return player
+		end
+	end
+	return false
+end
+
+
 
 -- Subscribe to game events
 Events:Subscribe("PlayerJoin", onPlayerJoin)
